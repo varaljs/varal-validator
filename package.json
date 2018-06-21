@@ -1,0 +1,23 @@
+{
+  "name": "varal-validator",
+  "version": "1.0.0",
+  "description": "Validator for JavaScript Obj",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/varaljs/varal-validator.git"
+  },
+  "author": "dmpty",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/varaljs/varal-validator/issues"
+  },
+  "homepage": "https://github.com/varaljs/varal-validator#readme",
+  "files": [
+    "README.md",
+    "index.js"
+  ]
+}
