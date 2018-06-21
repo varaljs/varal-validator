@@ -1,4 +1,7 @@
 const methods = {
+    type(value, type) {
+        return typeof value === type;
+    },
     min(value, length) {
         return value.length >= length;
     },
@@ -7,14 +10,19 @@ const methods = {
     },
     between(value, min, max) {
         return value.length >= min && value.length <= max;
+    },
+    regexp(value, regexp) {
+        return regexp.test(value);
     }
 };
 
 const errors = {
     required: '# is required',
+    type: '# must be type of $1',
     min: 'The length of # must be more than $1',
     max: 'The length of # must be less than $1',
     between: 'The length of # must between $1 to $2',
+    regexp: '# not conform to the expected format'
 };
 
 class Validator {
@@ -33,7 +41,7 @@ class Validator {
                 const fieldRules = rules[field];
                 if (data[field]) {
                     for (let rule in fieldRules)
-                        if (fieldRules.hasOwnProperty(rule) && typeof this.methods[rule] === 'function') {
+                        if (fieldRules.hasOwnProperty(rule) && rule !== 'msg' && typeof this.methods[rule] === 'function') {
                             const args = fieldRules[rule];
                             let res;
                             if (Array.isArray(args))
@@ -41,13 +49,13 @@ class Validator {
                             else
                                 res = this.methods[rule](data[field], args);
                             if (!res) {
-                                this.fail(field, rule, args);
+                                this.fail(field, rule, args, fieldRules['msg']);
                                 if (all !== true)
                                     return;
                             }
                         }
                 } else if (fieldRules['required'] === true) {
-                    this.fail(field, 'required');
+                    this.fail(field, 'required', null, fieldRules['msg']);
                     if (all !== true)
                         return;
                 }
@@ -58,9 +66,11 @@ class Validator {
         return this.check(rules, data, true);
     }
 
-    fail(field, rule, args) {
+    fail(field, rule, args, msg) {
         this.valid = false;
-        this.msg.push(this.formatError(field, rule, args));
+        msg = msg || this.formatError(field, rule, args);
+        if (this.msg.indexOf(msg) < 0)
+            this.msg.push(msg);
         this.failed.push(field);
     }
 
