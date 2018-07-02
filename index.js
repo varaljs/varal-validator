@@ -60,6 +60,12 @@ class Validator {
                                 this.fail(field, rule, args, fieldRules['msg']);
                                 if (all !== true)
                                     return;
+                            } else if (res instanceof Promise) {
+                                return res.then(res => {
+                                    if (!res)
+                                        this.fail(field, rule, args, fieldRules['msg']);
+                                    return res;
+                                });
                             }
                         }
                 } else if (fieldRules['required'] === true) {
