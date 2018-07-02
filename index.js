@@ -1,24 +1,32 @@
 const methods = {
-    type(value, type) {
-        return typeof value === type;
+    type(source, type) {
+        return typeof source === type;
     },
-    min(value, length) {
-        return value.length >= length;
+    is(source, value) {
+        return source === value;
     },
-    max(value, length) {
-        return value.length <= length;
+    in(source, ...values) {
+        return values.indexOf(source) >= 0;
     },
-    between(value, min, max) {
-        return value.length >= min && value.length <= max;
+    min(source, length) {
+        return source.length >= length;
     },
-    regexp(value, regexp) {
-        return regexp.test(value);
+    max(source, length) {
+        return source.length <= length;
+    },
+    between(source, min, max) {
+        return source.length >= min && source.length <= max;
+    },
+    regexp(source, regexp) {
+        return regexp.test(source);
     }
 };
 
 const errors = {
     required: '# is required',
     type: '# must be type of $1',
+    is: 'Incorrect value for #',
+    in: 'Incorrect value for #',
     min: 'The length of # must be more than $1',
     max: 'The length of # must be less than $1',
     between: 'The length of # must between $1 to $2',
