@@ -8,13 +8,22 @@ const methods = {
     in(source, ...values) {
         return values.indexOf(source) >= 0;
     },
-    min(source, length) {
-        return source.length >= length;
+    min(source, value) {
+        return source >= value;
     },
-    max(source, length) {
-        return source.length <= length;
+    max(source, value) {
+        return source <= value;
     },
     between(source, min, max) {
+        return source >= min && source <= max;
+    },
+    lengthMin(source, length) {
+        return source.length >= length;
+    },
+    lengthMax(source, length) {
+        return source.length <= length;
+    },
+    lengthBetween(source, min, max) {
         return source.length >= min && source.length <= max;
     },
     regexp(source, regexp) {
@@ -41,6 +50,7 @@ class Validator {
         this.valid = true;
         this.failed = [];
         this.msg = [];
+        this.asyncStack = [];
     }
 
     check(rules, data, all) {
@@ -60,13 +70,14 @@ class Validator {
                                 this.fail(field, rule, args, fieldRules['msg']);
                                 if (all !== true)
                                     return;
-                            } else if (res instanceof Promise) {
-                                return res.then(res => {
-                                    if (!res)
-                                        this.fail(field, rule, args, fieldRules['msg']);
-                                    return res;
+                            } else if (res instanceof Promise)
+                                this.asyncStack.push({
+                                    res,
+                                    field,
+                                    rule,
+                                    args,
+                                    msg: fieldRules['msg']
                                 });
-                            }
                         }
                 } else if (fieldRules['required'] === true) {
                     this.fail(field, 'required', null, fieldRules['msg']);
@@ -74,6 +85,8 @@ class Validator {
                         return;
                 }
             }
+        if (this.asyncStack.length > 0)
+            return this.asyncHandler(all);
     }
 
     checkAll(rules, data) {
@@ -109,6 +122,17 @@ class Validator {
 
     setError(name, msg) {
         this.errors[name] = msg;
+    }
+
+    async asyncHandler(all) {
+        for (let item of this.asyncStack) {
+            const res = await item.res;
+            if (!res) {
+                this.fail(item.field, item.rule, item.args, item.msg);
+                if (!all)
+                    return;
+            }
+        }
     }
 
 }
